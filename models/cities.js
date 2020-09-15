@@ -97,11 +97,19 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         defaultValue: 0,
       },
+      createdAt: {
+        field: "created_at",
+        type: DataTypes.DATE,
+      },
+      updatedAt: {
+        field: "updated_at",
+        type: DataTypes.DATE,
+      },
     },
     {
       sequelize,
       tableName: "cities",
-      timestamps: false,
+      // timestamps: false,
     }
   );
 };
