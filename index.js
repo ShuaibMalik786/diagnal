@@ -1,8 +1,9 @@
-const winston = require("winston");
 const express = require("express");
 const app = express();
+const winston = require("winston");
 
 // require("./startup/logging")();
+const mysqllib = require("./startup/sql");
 require("./startup/routes")(app);
 require("./startup/config")();
 require("./startup/validation")();
