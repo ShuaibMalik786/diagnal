@@ -1,4 +1,5 @@
 const Sequelize = require("sequelize");
+const winston = require("winston/lib/winston/config");
 
 const sequelize = new Sequelize("devticketstodo", "root", "", {
   host: "localhost",
@@ -12,12 +13,14 @@ const sequelize = new Sequelize("devticketstodo", "root", "", {
   },
 });
 
-try {
-  sequelize.authenticate();
-  console.log("SQL connection  established successfully.");
-} catch (error) {
-  console.error("Unable to connect to the SQL database:", error);
-}
+sequelize
+  .authenticate()
+  .then(function () {
+    console.log("connected to database " + sequelize.config.database);
+  })
+  .catch(function (er) {
+    console.log(er.message);
+  });
 
 module.exports = sequelize;
 global.sequelize = sequelize;

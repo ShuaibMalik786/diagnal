@@ -13,4 +13,7 @@ const server = app.listen(port, () =>
   winston.info(`Listening on port ${port}...`)
 );
 
+const associate = require("./associations/associations");
+associate();
+
 module.exports = server;
