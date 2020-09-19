@@ -7,6 +7,8 @@ const package_details = require("../models/package_details");
 const package_group_price_details = require("../models/package_group_price_details");
 const currency_exchange_rate = require("../models/currency_exchange_rate");
 const package_price_details = require("../models/package_price_details");
+const activity_images = require("../models/activity_images");
+const request = require("request-promise");
 
 router.get("/", async (req, res) => {
   let city;
@@ -18,53 +20,6 @@ router.get("/", async (req, res) => {
   }
   res.send(city);
 });
-
-// router.get("/cityPage/:cityId", async (req, res) => {
-//   let city;
-//   city = await cities.findOne({
-//     where: {
-//       city_id: req.params.cityId,
-//     },
-//   });
-
-//   if (!city) {
-//     res.status(403).send("Not Found");
-//   }
-
-//   let activities;
-//   activities = await activity_details.findAll({
-//     where: {
-//       city_id: req.params.cityId,
-//       status: 1,
-//     },
-//     order: [["activity_id", "DESC"]],
-//     group: ["activity_id"],
-//     include: {
-//       model: package_details,
-//       attributes: ["categoryL1", "package_name"],
-//       where: {
-//         status: 1,
-//       },
-//       include: {
-//         model: package_group_price_details,
-//         where: {
-//           status: 1,
-//         },
-//       },
-//     },
-//   });
-
-//   let responseArray = {
-//     city_id: city.city_id,
-//     name: city.displayname,
-//     first_block_text: city.first_block_text ? city.first_block_text : "",
-//     second_block_text: city.second_block_text ? city.second_block_text : "",
-//     imageurl: city.imageurl,
-//     largeimageurl: city.largeimageurl ? city.largeimageurl : "",
-//   };
-
-//   res.send(responseArray);
-// });
 
 router.get("/cityPage/:slug", async (req, res) => {
   let city;
@@ -101,13 +56,37 @@ router.get("/cityPage/:slug", async (req, res) => {
     },
   });
 
+  let weather = await request(
+    "https://api.openweathermap.org/data/2.5/weather?APPID=d56ede068d1a756433df9ee0d1b6b263&q=" +
+      city.displayname
+  );
+
+  weather = JSON.parse(weather);
+
+  if (weather.cod !== 200) {
+    res.status(500).send("error");
+  }
+
+  if (weather.cod == "200") {
+    var kelvin = weather.main.temp;
+    var weather_details = weather.weather;
+    if (weather_details.length > 0) {
+      var weather_main = weather_details[0].main;
+      var icon = weather_details[0].icon;
+      var icon_url = "https://openweathermap.org/img/w/" + icon + ".png";
+    }
+    var celcius = kelvin - 273.15;
+    celcius = celcius.toFixed(2);
+    celcius = Math.ceil(celcius);
+  }
+
   let responseArray = {
     city_id: city.city_id,
     name: city.displayname,
     slug: city.slug,
     first_block_text: city.first_block_text ? city.first_block_text : "",
     second_block_text: city.second_block_text ? city.second_block_text : "",
-    imageurl: city.imageurl ? city.imageurl : "",
+    image_url: city.image_url ? city.image_url : "",
     alt_image_description: city.alt_image_description
       ? city.alt_image_description
       : "",
@@ -116,11 +95,11 @@ router.get("/cityPage/:slug", async (req, res) => {
       month: "short",
       year: "numeric",
     })}`,
-    temprature: "zzzzzzzzzzzzzz",
-    weather_condition: "zzzzzzzzzzzzzz",
-    weather_icon_url: "zzzzzzzzzzzzzz",
+    temprature: celcius,
+    weather_condition: weather_main,
+    weather_icon_url: icon_url,
     largeimage_path_name: "zzzzzzzzzzzzzz",
-    largeimageurl: "zzzzzzzzzzzzzz",
+    largeimageurl: city.largeimageurl,
     cityActivities: [],
   };
 
@@ -149,7 +128,7 @@ router.get("/cityPage/:slug", async (req, res) => {
     var packageArr = await package_details.findOne({
       attributes: ["status"],
       where: {
-        activity_id: activities[0].activity_id,
+        activity_id: activities[i].activity_id,
       },
       include: [
         {
@@ -217,30 +196,42 @@ router.get("/cityPage/:slug", async (req, res) => {
           activity_id: activities[i].activity_id,
           list_price: (
             curr_exchange_rate *
-            MinActivityPackagesArr.package_group_price_detail.original_price
+            packageArr.package_group_price_detail.original_price
           ).toFixed(2),
           web_price: (
             curr_exchange_rate *
-            MinActivityPackagesArr.package_group_price_detail.original_price
+            packageArr.package_group_price_detail.original_price
           ).toFixed(2),
           price: (
             curr_exchange_rate *
-            MinActivityPackagesArr.package_group_price_detail.original_price
+            packageArr.package_group_price_detail.original_price
           ).toFixed(2),
-          currency: MinActivityPackagesArr.package_price_detail.currency,
+          currency: packageArr.package_price_detail.currency,
           request_currency: req.query.currency,
           min_list_price: (
             curr_exchange_rate *
-            MinActivityPackagesArr.package_group_price_detail.original_price
+            packageArr.package_group_price_detail.original_price
           ).toFixed(2),
           min_web_price: (
             curr_exchange_rate *
-            MinActivityPackagesArr.package_group_price_detail.original_price
+            packageArr.package_group_price_detail.original_price
           ).toFixed(2),
-          min_web_price: (
-            curr_exchange_rate *
-            MinActivityPackagesArr.package_group_price_detail.original_price
-          ).toFixed(2),
+          // list_price: (
+          //   curr_exchange_rate *
+          //   packageArr.package_group_price_detail.original_price
+          // ).toFixed(2),
+          // web_price: (
+          //   curr_exchange_rate *
+          //   packageArr.package_group_price_detail.original_price
+          // ).toFixed(2),
+          // price: (
+          //   curr_exchange_rate *
+          //   packageArr.package_group_price_detail.original_price
+          // ).toFixed(2),
+          // price: (
+          //   curr_exchange_rate *
+          //   packageArr.package_group_price_detail.original_price
+          // ).toFixed(2),
         });
 
         if (MinActivityPackagesArr) {
@@ -248,7 +239,92 @@ router.get("/cityPage/:slug", async (req, res) => {
             curr_exchange_rate *
             MinActivityPackagesArr.package_group_price_detail.original_price
           ).toFixed(2);
+          responseArray.cityActivities[i].min_default_discounted_price = (
+            curr_exchange_rate *
+            MinActivityPackagesArr.package_group_price_detail.original_price
+          ).toFixed(2);
+        } else {
+          responseArray.cityActivities[i].min_default_original_price = (
+            curr_exchange_rate * responseArray.cityActivities[i].min_list_price
+          ).toFixed(2);
+          responseArray.cityActivities[i].min_default_discounted_price = (
+            curr_exchange_rate * responseArray.cityActivities[i].min_web_price
+          ).toFixed(2);
         }
+
+        // Get activities images
+        let image_mapping = await activity_images.findAll({
+          where: {
+            activity_id: activities[i].activity_id,
+            status: 1,
+          },
+          attributes: [
+            "activity_id",
+            ["content_url", "image_url"],
+            "alt_image_description",
+            "description",
+            "filename",
+            "mime_type",
+            ["upload_type", "file_type"],
+          ],
+        });
+
+        image_mapping = JSON.parse(JSON.stringify(image_mapping));
+
+        responseArray.cityActivities[i].image_url = image_mapping[0].image_url;
+        responseArray.cityActivities[i].alt_image_description =
+          image_mapping[0].alt_image_description;
+
+        if (image_mapping[0].image_url) {
+          let image_path_name =
+            image_mapping[0].image_url.split("/")[
+              image_mapping[0].image_url.split("/").length - 2
+            ] +
+            "/" +
+            image_mapping[0].image_url.split("/")[
+              image_mapping[0].image_url.split("/").length - 1
+            ];
+          responseArray.cityActivities[i].image_path_name = image_path_name;
+        }
+
+        responseArray.cityActivities[i].name = activities[i].name;
+        responseArray.cityActivities[i].city = city.displayname;
+        responseArray.cityActivities[i].activity_id = activities[i].activity_id;
+        responseArray.cityActivities[i].subHeading = activities[i].reviews;
+        responseArray.cityActivities[i].booked = 0;
+        responseArray.cityActivities[i].rating = 0;
+        responseArray.cityActivities[i].discountPrice = 0;
+        responseArray.cityActivities[i].activity_url = activities[i].slug;
+
+        //Popular count
+        let popular_count;
+        if (
+          activities[0].status == 1 &&
+          activities[0].city_id == city.city_id
+        ) {
+          popular_count = await package_details.findAll({
+            where: {
+              status: 1,
+              activity_id: activities[0].activity_id,
+              popular_category: 1,
+            },
+            include: [
+              //   {
+              //     model: package_price_details,
+              //     attributes: ["currency"],
+              //   },
+              {
+                model: package_group_price_details,
+                where: {
+                  status: 1,
+                },
+              },
+            ],
+          });
+        }
+
+        responseArray.popular_count = popular_count.length;
+
         res.send(responseArray);
       }
     }

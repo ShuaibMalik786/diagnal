@@ -24,6 +24,8 @@
     "joi-objectid": "^3.0.1",
     "mysql2": "^2.1.0",
     "nodemon": "^2.0.4",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
     "sequelize": "^6.3.5",
     "sequelize-auto": "^0.5.4",
     "winston": "^3.3.3"
