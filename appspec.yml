@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /var/www/nodedevapi_ttd_bkp
+hooks:
+  BeforeInstall:
+   - location: scripts/beforeInstall.sh
+     timeout: 300
+     runas: root
+  ValidateService:
+   - location: scripts/afterInstall.sh
+     timeout: 300
+     runas: root
