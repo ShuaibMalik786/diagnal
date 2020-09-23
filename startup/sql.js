@@ -1,6 +1,6 @@
 const Sequelize = require("sequelize");
 
-//local
+// local
 // const sequelize = new Sequelize("devticketstodo", "root", "", {
 //   host: "localhost",
 //   dialect: "mysql",

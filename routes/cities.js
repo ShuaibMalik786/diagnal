@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const winston = require("winston");
 const cities = require("../models/cities");
 const activity_details = require("../models/activity_details");
 const package_details = require("../models/package_details");
@@ -10,11 +11,11 @@ const activity_images = require("../models/activity_images");
 const request = require("request-promise");
 
 router.get("/", async (req, res) => {
-  let city;
+  var city;
   try {
     city = await cities.findAll();
-  } catch (err) {
-    res.status(500).send(err);
+  } catch (e) {
+    winston.error(e);
     res.send(e);
   }
   res.send(city);
@@ -22,7 +23,8 @@ router.get("/", async (req, res) => {
 
 router.get("/cityPage/:slug", async (req, res) => {
   try {
-    let city;
+    var city;
+    var responseArray = {};
     city = await cities.findOne({
       where: {
         slug: req.params.slug,
@@ -33,7 +35,7 @@ router.get("/cityPage/:slug", async (req, res) => {
       res.status(403).send("Not Found");
     }
 
-    let activities;
+    var activities;
     activities = await activity_details.findAll({
       where: {
         city_id: city.city_id,
@@ -56,17 +58,39 @@ router.get("/cityPage/:slug", async (req, res) => {
       },
     });
 
-    var weather;
-    weather = request(
+    request(
       "https://api.openweathermap.org/data/2.5/weather?APPID=d56ede068d1a756433df9ee0d1b6b263&q=" +
-        city.displayname
+        city.displayname,
+      function (err, response, body) {
+        if (err) {
+        } else {
+          weather = JSON.parse(body);
+
+          if (weather.cod !== 200) {
+            res.status(500).send("error");
+          }
+
+          if (weather.cod == "200") {
+            var kelvin = weather.main.temp;
+            var weather_details = weather.weather;
+            if (weather_details.length > 0) {
+              var weather_main = weather_details[0].main;
+              var icon = weather_details[0].icon;
+              var icon_url =
+                "https://openweathermap.org/img/w/" + icon + ".png";
+            }
+            var celcius = kelvin - 273.15;
+            celcius = celcius.toFixed(2);
+            celcius = Math.ceil(celcius);
+            responseArray.temprature = celcius;
+            responseArray.weather_condition = weather_main;
+            responseArray.weather_icon_url = icon_url;
+          }
+        }
+      }
     );
 
-    // if (weather.cod !== 200) {
-    //   res.status(500).send("error");
-    // }
-
-    var responseArray = {
+    responseArray = {
       city_id: city.city_id,
       name: city.displayname,
       slug: city.slug,
@@ -81,16 +105,13 @@ router.get("/cityPage/:slug", async (req, res) => {
         month: "short",
         year: "numeric",
       })}`,
-      temprature: celcius,
-      weather_condition: weather_main,
-      weather_icon_url: icon_url,
       largeimage_path_name: "zzzzzzzzzzzzzz",
       largeimageurl: city.largeimageurl,
       cityActivities: [],
     };
 
-    let to_currency_exchange_rate = 1;
-    let curr_exchange_rate;
+    var to_currency_exchange_rate = 1;
+    var curr_exchange_rate;
 
     if (req.query.currency) {
       curr_exchange_rate = await currency_exchange_rate.findOne({
@@ -134,7 +155,7 @@ router.get("/cityPage/:slug", async (req, res) => {
         ],
       });
 
-      let curr_exchange_rate = 1;
+      var curr_exchange_rate = 1;
 
       if (packageArr) {
         // $currency = packageArr.package_price_details.currency;
@@ -143,12 +164,12 @@ router.get("/cityPage/:slug", async (req, res) => {
           req.query.currency &&
           packageArr.package_price_detail.currency != req.query.currency
         ) {
-          let fromCurrencyRates = await currency_exchange_rate.findOne({
+          var fromCurrencyRates = await currency_exchange_rate.findOne({
             where: {
               currency: packageArr.package_price_detail.currency,
             },
           });
-          let from_currency_exchange_rate = fromCurrencyRates.rate;
+          var from_currency_exchange_rate = fromCurrencyRates.rate;
           curr_exchange_rate =
             Number(to_currency_exchange_rate) /
             Number(from_currency_exchange_rate);
@@ -156,7 +177,7 @@ router.get("/cityPage/:slug", async (req, res) => {
             curr_exchange_rate = 1;
           }
 
-          let MinActivityPackagesArr = await package_details.findOne({
+          var MinActivityPackagesArr = await package_details.findOne({
             where: {
               status: 1,
               activity_id: activities[0].activity_id,
@@ -244,7 +265,7 @@ router.get("/cityPage/:slug", async (req, res) => {
           }
 
           // Get activities images
-          let image_mapping = await activity_images.findAll({
+          var image_mapping = await activity_images.findAll({
             where: {
               activity_id: activities[i].activity_id,
               status: 1,
@@ -268,7 +289,7 @@ router.get("/cityPage/:slug", async (req, res) => {
             image_mapping[0].alt_image_description;
 
           if (image_mapping[0].image_url) {
-            let image_path_name =
+            var image_path_name =
               image_mapping[0].image_url.split("/")[
                 image_mapping[0].image_url.split("/").length - 2
               ] +
@@ -290,7 +311,7 @@ router.get("/cityPage/:slug", async (req, res) => {
           responseArray.cityActivities[i].activity_url = activities[i].slug;
 
           //Popular count
-          let popular_count;
+          var popular_count;
           if (
             activities[0].status == 1 &&
             activities[0].city_id == city.city_id
@@ -317,30 +338,12 @@ router.get("/cityPage/:slug", async (req, res) => {
           }
 
           responseArray.popular_count = popular_count.length;
-
-          // res.send(responseArray);
         }
       }
     }
   } catch (err) {
-    res.send(err);
+    res.status(500).send(err);
   } finally {
-    res.send(responseArray);
-
-    weather = JSON.parse(weather);
-
-    if (weather.cod == "200") {
-      var kelvin = weather.main.temp;
-      var weather_details = weather.weather;
-      if (weather_details.length > 0) {
-        var weather_main = weather_details[0].main;
-        var icon = weather_details[0].icon;
-        var icon_url = "https://openweathermap.org/img/w/" + icon + ".png";
-      }
-      var celcius = kelvin - 273.15;
-      celcius = celcius.toFixed(2);
-      celcius = Math.ceil(celcius);
-    }
     res.send(responseArray);
   }
 });
