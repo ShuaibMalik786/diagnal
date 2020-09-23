@@ -58,37 +58,37 @@ router.get("/cityPage/:slug", async (req, res) => {
       },
     });
 
-    // request(
-    //   "https://api.openweathermap.org/data/2.5/weather?APPID=d56ede068d1a756433df9ee0d1b6b263&q=" +
-    //     city.displayname,
-    //   function (err, response, body) {
-    //     if (err) {
-    //     } else {
-    //       weather = JSON.parse(body);
+    request(
+      "https://api.openweathermap.org/data/2.5/weather?APPID=d56ede068d1a756433df9ee0d1b6b263&q=" +
+        city.displayname,
+      function (err, response, body) {
+        if (err) {
+        } else {
+          weather = JSON.parse(body);
 
-    //       if (weather.cod !== 200) {
-    //         res.status(500).send("error");
-    //       }
+          if (weather.cod !== 200) {
+            res.status(500).send("error");
+          }
 
-    //       if (weather.cod == "200") {
-    //         var kelvin = weather.main.temp;
-    //         var weather_details = weather.weather;
-    //         if (weather_details.length > 0) {
-    //           var weather_main = weather_details[0].main;
-    //           var icon = weather_details[0].icon;
-    //           var icon_url =
-    //             "https://openweathermap.org/img/w/" + icon + ".png";
-    //         }
-    //         var celcius = kelvin - 273.15;
-    //         celcius = celcius.toFixed(2);
-    //         celcius = Math.ceil(celcius);
-    //         responseArray.temprature = celcius;
-    //         responseArray.weather_condition = weather_main;
-    //         responseArray.weather_icon_url = icon_url;
-    //       }
-    //     }
-    //   }
-    // );
+          if (weather.cod == "200") {
+            var kelvin = weather.main.temp;
+            var weather_details = weather.weather;
+            if (weather_details.length > 0) {
+              var weather_main = weather_details[0].main;
+              var icon = weather_details[0].icon;
+              var icon_url =
+                "https://openweathermap.org/img/w/" + icon + ".png";
+            }
+            var celcius = kelvin - 273.15;
+            celcius = celcius.toFixed(2);
+            celcius = Math.ceil(celcius);
+            responseArray.temprature = celcius;
+            responseArray.weather_condition = weather_main;
+            responseArray.weather_icon_url = icon_url;
+          }
+        }
+      }
+    );
 
     responseArray = {
       city_id: city.city_id,
