@@ -40,7 +40,7 @@ router.get("/cityPage/:slug", async (req, res) => {
         status: 1,
       },
       order: [["activity_sequence", "ASC"]],
-      group: ["activity_id"],
+      // group: ["activity_id"],
       include: {
         model: package_details,
         attributes: ["categoryL1", "package_name"],
