@@ -56,7 +56,7 @@ router.get("/cityPage/:slug", async (req, res) => {
       },
     });
 
-    let weather;
+    var weather;
     weather = request(
       "https://api.openweathermap.org/data/2.5/weather?APPID=d56ede068d1a756433df9ee0d1b6b263&q=" +
         city.displayname
@@ -66,7 +66,7 @@ router.get("/cityPage/:slug", async (req, res) => {
     //   res.status(500).send("error");
     // }
 
-    let responseArray = {
+    var responseArray = {
       city_id: city.city_id,
       name: city.displayname,
       slug: city.slug,
@@ -105,7 +105,7 @@ router.get("/cityPage/:slug", async (req, res) => {
       res.send(responseArray);
     }
 
-    for (i = 0; i < 1; i++) {
+    for (i = 0; i < activities.length; i++) {
       // currencyExchange = await currency_exchange_rate.findOne({
       //   where: {
       //     currency: req.query.currency,
@@ -318,13 +318,15 @@ router.get("/cityPage/:slug", async (req, res) => {
 
           responseArray.popular_count = popular_count.length;
 
-          res.send(responseArray);
+          // res.send(responseArray);
         }
       }
     }
   } catch (err) {
     res.send(err);
   } finally {
+    res.send(responseArray);
+
     weather = JSON.parse(weather);
 
     if (weather.cod == "200") {
@@ -339,7 +341,7 @@ router.get("/cityPage/:slug", async (req, res) => {
       celcius = celcius.toFixed(2);
       celcius = Math.ceil(celcius);
     }
-    res.send(packageArr);
+    res.send(responseArray);
   }
 });
 
