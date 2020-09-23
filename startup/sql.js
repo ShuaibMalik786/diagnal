@@ -1,5 +1,4 @@
 const Sequelize = require("sequelize");
-const winston = require("winston/lib/winston/config");
 
 const sequelize = new Sequelize("devticketstodo", "devticketstodousr", "devticketstodopwd", {
   host: "localhost",

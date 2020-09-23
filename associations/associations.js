@@ -1,4 +1,3 @@
-const winston = require("winston");
 const activity_details = require("../models/activity_details");
 const package_details = require("../models/package_details");
 const package_group_price_details = require("../models/package_group_price_details");
