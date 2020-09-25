@@ -1,6 +1,6 @@
 const express = require("express");
-const test = require("../routes/test");
-const cities = require("../routes/cities");
+const test = require("../controllers/test");
+const cities = require("../controllers/cities");
 
 module.exports = function (app) {
   app.use(express.json());

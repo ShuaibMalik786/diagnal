@@ -9,6 +9,7 @@ const currency_exchange_rate = require("../models/currency_exchange_rate");
 const package_price_details = require("../models/package_price_details");
 const activity_images = require("../models/activity_images");
 const request = require("request-promise");
+const helper = require("../utilities/helper");
 
 router.get("/", async (req, res) => {
   var city;
@@ -18,7 +19,8 @@ router.get("/", async (req, res) => {
     winston.error(e);
     res.send(e);
   }
-  res.send(city);
+  // res.send(city);
+  helper.send(res, 200, city);
 });
 
 router.get("/cityPage/:slug", async (req, res) => {
@@ -32,8 +34,41 @@ router.get("/cityPage/:slug", async (req, res) => {
     });
 
     if (!city) {
-      res.status(403).send("Not Found");
+      helper.send(res, 403, "", "Not Found");
     }
+
+    request(
+      "https://api.openweathermap.org/data/2.5/weather?APPID=d56ede068d1a756433df9ee0d1b6b263&q=" +
+        city.displayname,
+      function (err, response, body) {
+        if (err) {
+          helper.send(res, 500, "", "someting failed");
+        } else {
+          weather = JSON.parse(body);
+
+          if (weather.cod !== 200) {
+            helper.send(res, 500, "", "someting failed");
+          }
+
+          if (weather.cod == "200") {
+            var kelvin = weather.main.temp;
+            var weather_details = weather.weather;
+            if (weather_details.length > 0) {
+              var weather_main = weather_details[0].main;
+              var icon = weather_details[0].icon;
+              var icon_url =
+                "https://openweathermap.org/img/w/" + icon + ".png";
+            }
+            var celcius = kelvin - 273.15;
+            celcius = celcius.toFixed(2);
+            celcius = Math.ceil(celcius);
+            responseArray.temprature = celcius;
+            responseArray.weather_condition = weather_main;
+            responseArray.weather_icon_url = icon_url;
+          }
+        }
+      }
+    );
 
     var activities;
     activities = await activity_details.findAll({
@@ -57,38 +92,6 @@ router.get("/cityPage/:slug", async (req, res) => {
         },
       },
     });
-
-    request(
-      "https://api.openweathermap.org/data/2.5/weather?APPID=d56ede068d1a756433df9ee0d1b6b263&q=" +
-        city.displayname,
-      function (err, response, body) {
-        if (err) {
-        } else {
-          weather = JSON.parse(body);
-
-          if (weather.cod !== 200) {
-            res.status(500).send("error");
-          }
-
-          if (weather.cod == "200") {
-            var kelvin = weather.main.temp;
-            var weather_details = weather.weather;
-            if (weather_details.length > 0) {
-              var weather_main = weather_details[0].main;
-              var icon = weather_details[0].icon;
-              var icon_url =
-                "https://openweathermap.org/img/w/" + icon + ".png";
-            }
-            var celcius = kelvin - 273.15;
-            celcius = celcius.toFixed(2);
-            celcius = Math.ceil(celcius);
-            responseArray.temprature = celcius;
-            responseArray.weather_condition = weather_main;
-            responseArray.weather_icon_url = icon_url;
-          }
-        }
-      }
-    );
 
     responseArray = {
       city_id: city.city_id,
@@ -123,7 +126,7 @@ router.get("/cityPage/:slug", async (req, res) => {
     }
 
     if (activities.length == 0) {
-      res.send(responseArray);
+      helper.send(res, 200, responseArray, "");
     }
 
     for (i = 0; i < activities.length; i++) {
@@ -342,9 +345,9 @@ router.get("/cityPage/:slug", async (req, res) => {
       }
     }
   } catch (err) {
-    res.status(500).send(err);
+    helper.send(res, 500, "", "Somthing failed");
   } finally {
-    res.send(responseArray);
+    helper.send(res, 200, responseArray, "");
   }
 });
 
