@@ -108,7 +108,12 @@ router.get("/cityPage/:slug", async (req, res) => {
         month: "short",
         year: "numeric",
       })}`,
-      largeimage_path_name: "zzzzzzzzzzzzzz",
+      largeimage_path_name:
+        city.largeimageurl.split("/")[
+          city.largeimageurl.split("/").length - 2
+        ] +
+        "/" +
+        city.largeimageurl.split("/")[city.largeimageurl.split("/").length - 1],
       largeimageurl: city.largeimageurl,
       cityActivities: [],
     };
