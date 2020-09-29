@@ -24,7 +24,7 @@ module.exports.getCityCategories = async (city_id) => {
         },
       },
       attributes: ["package_details.categoryL1"],
-      group: ["package_details.categoryL1"],
+    //   group: ["package_details.categoryL1"],
       raw: true,
     });
 
