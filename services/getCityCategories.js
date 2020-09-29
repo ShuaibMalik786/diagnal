@@ -1,6 +1,7 @@
 const activity_details = require("../models/activity_details");
 const categoriesModel = require("../models/categories");
 const package_details = require("../models/package_details");
+const package_group_price_details = require("../models/package_group_price_details");
 
 module.exports.getCityCategories = async (city_id) => {
   try {
@@ -14,6 +15,12 @@ module.exports.getCityCategories = async (city_id) => {
         model: package_details,
         where: {
           status: 1,
+        },
+        include: {
+          model: package_group_price_details,
+          where: {
+            status: 1,
+          },
         },
       },
       attributes: ["package_details.categoryL1"],
@@ -30,6 +37,7 @@ module.exports.getCityCategories = async (city_id) => {
     let category = await categoriesModel.findAll({
       where: {
         cg_id: cg_id_arr,
+        status: 1,
       },
       attributes: [
         ["cg_id", "id"],
