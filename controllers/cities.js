@@ -67,10 +67,9 @@ router.get("/cityPage/:slug", async (req, res) => {
   async.parallel(
     {
       // categories
-      categories: (callback) => {
-        categoriesModel.findAll().then((results) => {
-          callback(null, results);
-        });
+      categories: async () => {
+        let result = await getCityCategories(city.city_id);
+        return result;
       },
       // weather
       weather: (callback) => {
