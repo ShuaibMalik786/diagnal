@@ -1,35 +1,35 @@
 const Sequelize = require("sequelize");
 
 // local
-const sequelize = new Sequelize("devticketstodo", "root", "", {
-  host: "localhost",
-  dialect: "mysql",
-  logging: false,
+// const sequelize = new Sequelize("devticketstodo", "root", "", {
+//   host: "localhost",
+//   dialect: "mysql",
+//   logging: false,
 
-  pool: {
-    max: 5,
-    min: 0,
-    idle: 10000,
-  },
-});
+//   pool: {
+//     max: 5,
+//     min: 0,
+//     idle: 10000,
+//   },
+// });
 
 // dev
-// const sequelize = new Sequelize(
-//   "devticketstodo",
-//   "devticketstodousr",
-//   "devticketstodopwd",
-//   {
-//     host: "localhost",
-//     dialect: "mysql",
-//     logging: false,
+const sequelize = new Sequelize(
+  "devticketstodo",
+  "devticketstodousr",
+  "devticketstodopwd",
+  {
+    host: "localhost",
+    dialect: "mysql",
+    logging: false,
 
-//     pool: {
-//       max: 5,
-//       min: 0,
-//       idle: 10000,
-//     },
-//   }
-// );
+    pool: {
+      max: 5,
+      min: 0,
+      idle: 10000,
+    },
+  }
+);
 
 sequelize
   .authenticate()
