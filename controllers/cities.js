@@ -90,8 +90,8 @@ router.get("/cityPage/:slug", async (req, res) => {
     },
     function (err, results) {
       responseArray.categories = results.categories;
-      responseArray.cityActivities = results.activities.cityActivities;
-      responseArray.popular_count = results.activities.popular_count;
+      // responseArray.cityActivities = results.activities.cityActivities;
+      // responseArray.popular_count = results.activities.popular_count;
       weatherRes = results.weather;
       {
         if (weatherRes.cod !== 200) {
