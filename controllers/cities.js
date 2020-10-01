@@ -70,7 +70,6 @@ router.get("/cityPage/:slug", async (req, res) => {
       // City activities
       activities: async () => {
         let result = await getCityActivities(req, res, city);
-        console.log(3);
         return result;
       },
       // weather
@@ -79,7 +78,6 @@ router.get("/cityPage/:slug", async (req, res) => {
           "https://api.openweathermap.org/data/2.5/weather?APPID=d56ede068d1a756433df9ee0d1b6b263&q=" +
             city.displayname
         ).then((results) => {
-          console.log(2);
           results = JSON.parse(results);
           callback(null, results);
         });
@@ -87,7 +85,6 @@ router.get("/cityPage/:slug", async (req, res) => {
       // categories
       categories: async () => {
         let result = await getCityCategories(city.city_id);
-        console.log(1);
         return result;
       },
     },
