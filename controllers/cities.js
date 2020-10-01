@@ -68,10 +68,10 @@ router.get("/cityPage/:slug", async (req, res) => {
   async.parallel(
     {
       // City activities
-      activities: async () => {
-        let result = await getCityActivities(req, res, city);
-        return result;
-      },
+      // activities: async () => {
+      //   let result = await getCityActivities(req, res, city);
+      //   return result;
+      // },
       // weather
       weather: (callback) => {
         request(
