@@ -27,7 +27,7 @@ router.get("/", async (req, res) => {
 router.get("/cityPage/:slug", async (req, res) => {
   let categories;
   let weather;
-  var responseArray = { cityActivities: [] };
+  var responseArray = { Cityactivities: [] };
   var city;
 
   // city data
@@ -68,10 +68,10 @@ router.get("/cityPage/:slug", async (req, res) => {
   async.parallel(
     {
       // City activities
-      // activities: async () => {
-      //   let result = await getCityActivities(req, res, city);
-      //   return result;
-      // },
+      activities: async () => {
+        let result = await getCityActivities(req, res, city);
+        return result;
+      },
       // weather
       weather: (callback) => {
         request(
@@ -90,8 +90,8 @@ router.get("/cityPage/:slug", async (req, res) => {
     },
     function (err, results) {
       responseArray.categories = results.categories;
-      // responseArray.cityActivities = results.activities.cityActivities;
-      // responseArray.popular_count = results.activities.popular_count;
+      responseArray.Cityactivities = results.activities.cityActivities;
+      responseArray.popular_count = results.activities.popular_count;
       weatherRes = results.weather;
       {
         if (weatherRes.cod !== 200) {

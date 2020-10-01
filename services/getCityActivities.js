@@ -16,7 +16,7 @@ module.exports.getCityActivities = async (req, res, city) => {
       status: 1,
     },
     order: [["activity_sequence", "ASC"]],
-    // group: ["activity_id"],
+    group: ["activity_id"],
     include: {
       model: package_details,
       attributes: ["categoryL1", "package_name"],
@@ -30,6 +30,7 @@ module.exports.getCityActivities = async (req, res, city) => {
         },
       },
     },
+    order: [["activity_id", "DESC"]],
   });
 
   var to_currency_exchange_rate = 1;
@@ -102,7 +103,7 @@ module.exports.getCityActivities = async (req, res, city) => {
         var MinActivityPackagesArr = await package_details.findOne({
           where: {
             status: 1,
-            activity_id: activities[0].activity_id,
+            activity_id: activities[i].activity_id,
           },
           include: [
             {
