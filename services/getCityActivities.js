@@ -1,6 +1,5 @@
 const activity_details = require("../models/activity_details");
 const activity_images = require("../models/activity_images");
-const categoriesModel = require("../models/categories");
 const currency_exchange_rate = require("../models/currency_exchange_rate");
 const package_details = require("../models/package_details");
 const package_group_price_details = require("../models/package_group_price_details");
@@ -33,8 +32,24 @@ module.exports.getCityActivities = async (req, res, city) => {
     order: [["activity_id", "DESC"]],
   });
 
+  if (activities.length == 0) {
+    helper.send(res, 200, responseArray, "");
+  }
+
+  let abc = await customFunction(activities, city, req, res);
+  return abc;
+};
+
+async function customFunction(activities, city, req, res) {
+  var responseArray = { cityActivities: [] };
   var to_currency_exchange_rate = 1;
   var curr_exchange_rate;
+
+  for (var i = 0; i < activities.length; i++) {
+    responseArray.cityActivities.push({
+      activity_id: activities[i].activity_id,
+    });
+  }
 
   if (req.query.currency) {
     curr_exchange_rate = await currency_exchange_rate.findOne({
@@ -44,12 +59,7 @@ module.exports.getCityActivities = async (req, res, city) => {
     });
     to_currency_exchange_rate = curr_exchange_rate.rate;
   }
-
-  if (activities.length == 0) {
-    helper.send(res, 200, responseArray, "");
-  }
-
-  for (i = 0; i < activities.length; i++) {
+  const getActivities = activities.map(async (item, i) => {
     // currencyExchange = await currency_exchange_rate.findOne({
     //   where: {
     //     currency: req.query.currency,
@@ -122,47 +132,47 @@ module.exports.getCityActivities = async (req, res, city) => {
             [{ model: package_group_price_details }, "discounted_price", "ASC"],
           ],
         });
-        responseArray.cityActivities.push({
-          activity_id: activities[i].activity_id,
-          list_price: (
-            curr_exchange_rate *
-            packageArr.package_group_price_detail.original_price
-          ).toFixed(2),
-          web_price: (
-            curr_exchange_rate *
-            packageArr.package_group_price_detail.original_price
-          ).toFixed(2),
-          price: (
-            curr_exchange_rate *
-            packageArr.package_group_price_detail.original_price
-          ).toFixed(2),
-          currency: packageArr.package_price_detail.currency,
-          request_currency: req.query.currency,
-          min_list_price: (
-            curr_exchange_rate *
-            packageArr.package_group_price_detail.original_price
-          ).toFixed(2),
-          min_web_price: (
-            curr_exchange_rate *
-            packageArr.package_group_price_detail.original_price
-          ).toFixed(2),
-          // list_price: (
-          //   curr_exchange_rate *
-          //   packageArr.package_group_price_detail.original_price
-          // ).toFixed(2),
-          // web_price: (
-          //   curr_exchange_rate *
-          //   packageArr.package_group_price_detail.original_price
-          // ).toFixed(2),
-          // price: (
-          //   curr_exchange_rate *
-          //   packageArr.package_group_price_detail.original_price
-          // ).toFixed(2),
-          // price: (
-          //   curr_exchange_rate *
-          //   packageArr.package_group_price_detail.original_price
-          // ).toFixed(2),
-        });
+
+        responseArray.cityActivities[i].list_price = (
+          curr_exchange_rate *
+          packageArr.package_group_price_detail.original_price
+        ).toFixed(2);
+        responseArray.cityActivities[i].web_price = (
+          curr_exchange_rate *
+          packageArr.package_group_price_detail.original_price
+        ).toFixed(2);
+        responseArray.cityActivities[i].price = (
+          curr_exchange_rate *
+          packageArr.package_group_price_detail.original_price
+        ).toFixed(2);
+        (responseArray.cityActivities[i].currency =
+          packageArr.package_price_detail.currency),
+          (responseArray.cityActivities[i].request_currency =
+            req.query.currency);
+        responseArray.cityActivities[i].min_list_price = (
+          curr_exchange_rate *
+          packageArr.package_group_price_detail.original_price
+        ).toFixed(2);
+        responseArray.cityActivities[i].min_web_price = (
+          curr_exchange_rate *
+          packageArr.package_group_price_detail.original_price
+        ).toFixed(2);
+        // list_price: (
+        //   curr_exchange_rate *
+        //   packageArr.package_group_price_detail.original_price
+        // ).toFixed(2),
+        // web_price: (
+        //   curr_exchange_rate *
+        //   packageArr.package_group_price_detail.original_price
+        // ).toFixed(2),
+        // price: (
+        //   curr_exchange_rate *
+        //   packageArr.package_group_price_detail.original_price
+        // ).toFixed(2),
+        // price: (
+        //   curr_exchange_rate *
+        //   packageArr.package_group_price_detail.original_price
+        // ).toFixed(2),
 
         if (MinActivityPackagesArr) {
           responseArray.cityActivities[i].min_default_original_price = (
@@ -181,7 +191,6 @@ module.exports.getCityActivities = async (req, res, city) => {
             curr_exchange_rate * responseArray.cityActivities[i].min_web_price
           ).toFixed(2);
         }
-
         // Get activities images
         var image_mapping = await activity_images.findAll({
           where: {
@@ -256,6 +265,8 @@ module.exports.getCityActivities = async (req, res, city) => {
         responseArray.popular_count = popular_count.length;
       }
     }
-  }
+  });
+
+  await Promise.all(getActivities);
   return responseArray;
-};
+}
