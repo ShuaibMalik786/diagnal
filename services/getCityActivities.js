@@ -234,38 +234,35 @@ async function customFunction(activities, city, req, res) {
         responseArray.cityActivities[i].rating = 0;
         responseArray.cityActivities[i].discountPrice = 0;
         responseArray.cityActivities[i].activity_url = activities[i].slug;
-
-        //Popular count
-        var popular_count;
-        if (
-          activities[0].status == 1 &&
-          activities[0].city_id == city.city_id
-        ) {
-          popular_count = await package_details.findAll({
-            where: {
-              status: 1,
-              activity_id: activities[0].activity_id,
-              popular_category: 1,
-            },
-            include: [
-              //   {
-              //     model: package_price_details,
-              //     attributes: ["currency"],
-              //   },
-              {
-                model: package_group_price_details,
-                where: {
-                  status: 1,
-                },
-              },
-            ],
-          });
-        }
-
-        responseArray.popular_count = popular_count.length;
       }
     }
   });
+
+  //Popular count
+  var popular_count;
+  if (activities[0].status == 1 && activities[0].city_id == city.city_id) {
+    popular_count = await package_details.findAll({
+      where: {
+        status: 1,
+        popular_category: 1,
+      },
+      include: [
+        {
+          model: activity_details,
+          where: {
+            status: 1,
+          },
+        },
+        {
+          model: package_group_price_details,
+          where: {
+            status: 1,
+          },
+        },
+      ],
+    });
+  }
+  responseArray.popular_count = popular_count.length;
 
   await Promise.all(getActivities);
   return responseArray;

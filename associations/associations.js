@@ -9,6 +9,10 @@ associations = () => {
     foreignKey: "activity_id",
   });
 
+  package_details.hasOne(activity_details, {
+    foreignKey: "activity_id",
+  });
+
   package_details.hasOne(package_group_price_details, {
     foreignKey: "package_id",
   });

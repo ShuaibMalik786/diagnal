@@ -90,31 +90,31 @@ router.get("/cityPage/:slug", async (req, res) => {
     },
     function (err, results) {
       responseArray.categories = results.categories;
-      // responseArray.Cityactivities = results.activities.cityActivities;
-      // responseArray.popular_count = results.activities.popular_count;
-      // weatherRes = results.weather;
-      // {
-      //   if (weatherRes.cod !== 200) {
-      //     helper.send(res, 500, "", "someting failed");
-      //   }
+      responseArray.Cityactivities = results.activities.cityActivities;
+      responseArray.popular_count = results.activities.popular_count;
+      weatherRes = results.weather;
+      {
+        if (weatherRes.cod !== 200) {
+          helper.send(res, 500, "", "someting failed");
+        }
 
-      //   if (weatherRes.cod == "200") {
-      //     var kelvin = weatherRes.main.temp;
-      //     var weather_details = weatherRes.weather;
-      //     if (weatherRes.weather.length > 0) {
-      //       var weather_main = weather_details[0].main;
-      //       var icon = weather_details[0].icon;
-      //       var icon_url = "https://openweathermap.org/img/w/" + icon + ".png";
-      //     }
-      //     var celcius = kelvin - 273.15;
-      //     celcius = celcius.toFixed(2);
-      //     celcius = Math.ceil(celcius);
-      //     responseArray.temprature = celcius;
-      //     responseArray.weather_condition = weather_main;
-      //     responseArray.weather_icon_url = icon_url;
-      //   }
-      // }
-      helper.send(res, 200, results, "");
+        if (weatherRes.cod == "200") {
+          var kelvin = weatherRes.main.temp;
+          var weather_details = weatherRes.weather;
+          if (weatherRes.weather.length > 0) {
+            var weather_main = weather_details[0].main;
+            var icon = weather_details[0].icon;
+            var icon_url = "https://openweathermap.org/img/w/" + icon + ".png";
+          }
+          var celcius = kelvin - 273.15;
+          celcius = celcius.toFixed(2);
+          celcius = Math.ceil(celcius);
+          responseArray.temprature = celcius;
+          responseArray.weather_condition = weather_main;
+          responseArray.weather_icon_url = icon_url;
+        }
+      }
+      helper.send(res, 200, responseArray, "");
     }
   );
 });
