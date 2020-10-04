@@ -1,14 +1,17 @@
 send = (res, code, data, msg = "") => {
-  let result = {
+  let response = {
     error: {},
   };
   if (code >= 400 && code < 600) {
     data = "";
+    response.success = false;
   }
-  result.error.code = code;
-  result.error.message = msg;
-  result.result = data;
-  res.status(result.error.code).json(result);
+  response.error.code = code;
+  response.error.message = msg;
+  response.result = data;
+  response.success = true;
+
+  res.status(response.error.code).json(response);
 };
 
 module.exports = {

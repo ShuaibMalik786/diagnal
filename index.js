@@ -4,7 +4,6 @@ const app = express();
 // require("./startup/logging")();
 const mysqllib = require("./startup/sql");
 require("./startup/routes")(app);
-require("./startup/config")();
 require("./startup/validation")();
 
 const port = process.env.PORT || 4000;

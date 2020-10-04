@@ -1,23 +1,10 @@
 const Sequelize = require("sequelize");
+const { config } = require("../config/config");
 
-// local
-// const sequelize = new Sequelize("devticketstodo", "root", "", {
-//   host: "localhost",
-//   dialect: "mysql",
-//   logging: false,
-
-//   pool: {
-//     max: 5,
-//     min: 0,
-//     idle: 10000,
-//   },
-// });
-
-// dev
 const sequelize = new Sequelize(
-  "devticketstodo",
-  "devticketstodousr",
-  "devticketstodopwd",
+  config.SQL_DB,
+  config.SQL_DB_USER,
+  config.SQL_DB_PASSWORD,
   {
     host: "localhost",
     dialect: "mysql",
