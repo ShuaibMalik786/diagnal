@@ -1,9 +1,9 @@
 const express = require("express");
 const test = require("../controllers/test");
-const cities = require("../controllers/cities");
+const meta = require("../controllers/meta");
 
 module.exports = function (app) {
   app.use(express.json());
-  app.use("/napi/test", test);
-  app.use("/napi/cities", cities);
+  app.use("/api/test", test);
+  app.use("/api/getMeta", meta);
 };
